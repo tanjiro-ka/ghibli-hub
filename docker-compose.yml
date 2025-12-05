@@ -1,7 +1,25 @@
-version: "3.9"
 services:
-  backend:
+  api:
     build: ./backend
+    container_name: ghibli_api
     ports:
       - "8000:8000"
-    
+    volumes:
+      - ./backend/app:/app/app
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: ghibli_db
+    environment:
+      POSTGRES_USER: ghibli_user
+      POSTGRES_PASSWORD: ghibli_password
+      POSTGRES_DB: ghibli_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
