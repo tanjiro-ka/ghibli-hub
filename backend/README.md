@@ -6,7 +6,8 @@ This is the backend of the "My Ghibli World" project, built with **FastAPI** and
 ```bash
 backend/
 ├─ app/
-│  └─ main.py          # FastAPI application
+│  ├─ main.py          # FastAPI application
+│  ├─ database.py      # SQLAlchemy database configuration
 ├─ Dockerfile          # Dockerfile for FastAPI
 ├─ requirements.txt    # Python dependencies
 docker-compose.yml     # Compose file for backend + PostgreSQL
@@ -16,6 +17,11 @@ docker-compose.yml     # Compose file for backend + PostgreSQL
 
 - Docker Desktop
 - Docker Compose v2  
+- Python dependencies (`requirements.txt`):
+    - fastapi
+    - uvicorn
+    - sqlalchemy
+    - psycopg2-binary
 - Optional: pgAdmin or any PostgreSQL GUI for visual database management
 
 > [!NOTE]
@@ -36,12 +42,34 @@ This command will:
 - Start the PostgreSQL container (`db`)
 - Map the necessary ports to your local machine
 
-### 🌐 FastAPI Endpoints
-- API root: http://127.0.0.1:8000
-- Swagger docs: http://127.0.0.1:8000/docs
+### 🗄️ SQLAlchemy Database
+
+SQLAlchemy is a Python ORM (Object Relational Mapper) that allows you to interact with the database using Python objects instead of writing raw SQL queries. It handles database connections, table mappings, and relationships, making backend development easier and more maintainable.
+
+**Database configuration (inside `app/database.py`):**
+
+- Engine: `engine = create_engine(DATABASE_URL, echo=True)`
+- Session: `SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)`
+- Base class for models: `Base = declarative_base()`
+
+**Connect and test the database**
+Use the CLI inside the API container. From another terminal, execute: 
+
+```bash
+docker-compose exec api python
+```
+
+This opens the Python interpreter, where you can run: 
+```python
+from app.database import engine
+conn = engine.connect()
+conn.close()
+```
+
+If no errors appear, the SQLAlchemy connection is working correctly. 
 
 ### 🗄️ PostgreSQL Database
-**Environment Variables (docker-compose.yml):**
+**Environment Variables (`docker-compose.yml`):**
 ```yaml
 POSTGRES_USER=ghibli_user
 POSTGRES_PASSWORD=ghibli_password
@@ -49,6 +77,7 @@ POSTGRES_DB=ghibli_db
 ```
 
 **Connect to the database**
+
 `Option A: CLI inside the container`
 
 ```bash
@@ -68,3 +97,10 @@ SELECT NOW();
 - **User**: ghibli_user
 - **Password**: ghibli_password
 - **Database**: ghibli_db
+
+> [!TIP]
+You can leave "postgres" as the maintenance database. Once connected, you will see your database `ghibli_db` in the pgAdmin tree and can run queries there.
+
+### 🌐 FastAPI Endpoints
+- API root: http://127.0.0.1:8000
+- Swagger docs: http://127.0.0.1:8000/docs
