@@ -92,7 +92,7 @@ If you prefer to develop locally without Docker:
 
 4. Run migrations:
    ```powershell
-   cd app
+   cd app/
    alembic upgrade head
    ```
 
@@ -119,12 +119,12 @@ The backend currently implements the following SQLAlchemy models:
 ### 🗄️ Database migrations (Alembic)
 
 > [!IMPORTANT]
-> When running Alembic commands inside the Docker container, **always navigate to `/app/`** where `alembic.ini` is located. This is due to the Docker volume mount configuration.
+> When running Alembic commands inside the Docker container, **always navigate to `app/`** where `alembic.ini` is located. This is due to the Docker volume mount configuration.
 
 **Initial migration** (when DB is created):
 ```powershell
 docker-compose exec api bash
-cd /app
+cd app/
 alembic upgrade head
 exit
 ```
@@ -132,7 +132,7 @@ exit
 **After modifying models**, generate and apply new migrations:
 ```powershell
 docker-compose exec api bash
-cd /app
+cd app/
 alembic revision --autogenerate -m "describe your changes"
 # Review the migration file in alembic/versions/
 alembic upgrade head
@@ -142,7 +142,7 @@ exit
 Example:
 ```powershell
 docker-compose exec api bash
-cd /app
+cd app/
 alembic revision --autogenerate -m "add movie status tracking"
 alembic upgrade head
 ```

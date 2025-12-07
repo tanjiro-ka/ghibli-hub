@@ -2,9 +2,8 @@
 
 A full-stack web application for **Studio Ghibli movie enthusiasts**. Organize, track, and review your favorite Studio Ghibli films and characters.
 
-> **📚 Note:** This is a **personal learning project** built to practice full-stack web development, database design, and API development. It is an independent educational project created to demonstrate software engineering skills and build portfolio experience. Not affiliated with or derived from any existing projects.
-
----
+> [!NOTE]
+> This is a **personal learning project** built to practice full-stack web development, database design, and API development. It is an independent educational project created to demonstrate software engineering skills and build portfolio experience. Not affiliated with or derived from any existing projects.
 
 ## 📋 Overview
 
@@ -16,8 +15,6 @@ A full-stack web application for **Studio Ghibli movie enthusiasts**. Organize, 
 - **Manage favorites** Create personalized lists of favorite movies and characters
 - **View user profiles** See your activity, review history, and curated collections
 - **Authenticate via GitHub** Secure OAuth login integration
-
----
 
 ## 🏗️ Architecture
 
@@ -42,11 +39,9 @@ See [backend/README.md](./backend/README.md) for detailed backend documentation.
 ### **Frontend** (`frontend/`)
 - To be implemented (planned)
 
----
-
 ## 🎯 Project Goals
 
-### Phase 1: **Backend Infrastructure** ✅ In Progress
+### Phase 1: **Backend Infrastructure** ✅ In progress
 
 > [!IMPORTANT]
 > Focus is on building a solid, scalable backend with proper database design and API structure.
@@ -69,8 +64,6 @@ See [backend/README.md](./backend/README.md) for detailed backend documentation.
 - [ ] Advanced filtering and sorting
 - [ ] Watchlist sharing
 - [ ] Recommendation engine
-
----
 
 ## 🚀 Quick Start
 
@@ -135,8 +128,6 @@ Invoke-RestMethod -Uri 'http://localhost:8000/auth/me' `
   -Headers @{ Authorization = "Bearer $token" }
 ```
 
----
-
 ## 📁 Project Structure
 
 ```
@@ -164,8 +155,6 @@ my-ghibli-world/
 └── README.md                  # This file
 ```
 
----
-
 ## 🔑 Key Features
 
 ### 1. **Authentication**
@@ -185,8 +174,6 @@ my-ghibli-world/
 - User profile endpoints
 - Protected routes via JWT authentication
 
----
-
 ## 📚 Documentation
 
 ### Backend Development
@@ -199,9 +186,7 @@ See [.env.example](./.env.example) for all configurable variables.
 ### Database Schema
 Entity-relationship diagram and detailed schema documentation (coming soon)
 
----
-
-## 🛠️ Tech Stack
+## 💧 Tech Stack
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
@@ -213,8 +198,6 @@ Entity-relationship diagram and detailed schema documentation (coming soon)
 | **Auth** | GitHub OAuth 2.0 + JWT | - |
 | **Containerization** | Docker & Compose | Latest |
 | **Frontend** | React / Vue (TBA) | - |
-
----
 
 ## 🤝 Contributing
 
@@ -232,19 +215,13 @@ Contributions are welcome! Please follow these guidelines:
 
 See the [CONTRIBUTING.md](./CONTRIBUTING.md) file for detailed guidelines (coming soon).
 
----
-
 ## 📝 License
 
 This project is licensed under the **MIT License** — see [LICENSE](./LICENSE) file for details.
 
----
-
-## 🎨 Inspiration
+## 🎎 Inspiration
 
 This project celebrates the beautiful works of **Studio Ghibli** and is built using data from the public [Ghibli API](https://ghibliapi.vercel.app/). No official affiliation with Studio Ghibli.
-
----
 
 ## 📞 Contact and Support
 
