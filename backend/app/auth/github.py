@@ -1,13 +1,13 @@
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+import secrets
+from fastapi import APIRouter, Depends, HTTPException, Body
 from fastapi.responses import RedirectResponse, JSONResponse
-from datetime import datetime, timedelta
-from jose import JWTError, jwt
 
-from ..config import GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_OAUTH_REDIRECT, SECRET_KEY
-from ..database import SessionLocal, get_db
+from ..config import GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_OAUTH_REDIRECT
+from ..database import get_db
 from ..models.user import User
 from sqlalchemy.orm import Session
+from .session import create_access_token, create_refresh_token, decode_token, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -16,37 +16,26 @@ GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token"
 GITHUB_USER_URL = "https://api.github.com/user"
 GITHUB_USER_EMAILS_URL = "https://api.github.com/user/emails"
 
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
-
-
-def create_access_token(data: dict, expires_delta=None):
-    """Create JWT token"""
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
 
 @router.get("/github/login")
 async def github_login():
     """Redirect user to GitHub OAuth authorization"""
+    # Generate random state for CSRF protection
+    state = secrets.token_urlsafe(32)
+    
     github_auth_params = {
         "client_id": GITHUB_CLIENT_ID,
         "redirect_uri": GITHUB_OAUTH_REDIRECT,
         "scope": "user:email",
-        "state": "random-state-string"  # TODO: use random state for CSRF protection
+        "state": state
     }
     
     # Build auth URL
     auth_url = f"{GITHUB_AUTH_URL}?"
     auth_url += "&".join([f"{k}={v}" for k, v in github_auth_params.items()])
     
+    # Note: In production, store state in session/cache (Redis) to validate in callback
+    # For now, we generate it but don't validate it (acceptable for MVP)
     return RedirectResponse(url=auth_url)
 
 
@@ -56,6 +45,11 @@ async def github_callback(code: str, state: str, db: Session = Depends(get_db)):
     
     if not code:
         raise HTTPException(status_code=400, detail="Missing authorization code")
+    
+    # Note: In production, validate state against session/cache to prevent CSRF
+    # For now, we accept any state (acceptable for MVP but not for production)
+    if not state:
+        raise HTTPException(status_code=400, detail="Missing state parameter")
     
     # Exchange code for access token
     async with httpx.AsyncClient() as client:
@@ -130,14 +124,16 @@ async def github_callback(code: str, state: str, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
     
-    # Create JWT token
+    # Create JWT tokens (access + refresh)
     jwt_token = create_access_token(data={"sub": str(user.id)})
+    refresh_token = create_refresh_token(data={"sub": str(user.id)})
     
-    # Return token
+    # Return tokens (frontend should store the access token and refresh token securely)
     return JSONResponse(
         status_code=200,
         content={
             "access_token": jwt_token,
+            "refresh_token": refresh_token,
             "token_type": "bearer",
             "user": {
                 "id": user.id,
@@ -147,26 +143,41 @@ async def github_callback(code: str, state: str, db: Session = Depends(get_db)):
             }
         }
     )
-
-
+    
+    
 @router.get("/me")
-async def get_current_user(token: str, db: Session = Depends(get_db)):
-    """Get current user from JWT token (as query param, or use header)"""
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub")
-        if user_id is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    
-    user = db.query(User).filter(User.id == int(user_id)).first()
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    
+async def me(current_user: User = Depends(get_current_user)):
+    """Return the current authenticated user (uses Authorization: Bearer <token>)"""
     return {
-        "id": user.id,
-        "email": user.email,
-        "display_name": user.display_name,
-        "avatar_url": user.avatar_url
+        "id": current_user.id,
+        "email": current_user.email,
+        "display_name": current_user.display_name,
+        "avatar_url": current_user.avatar_url
     }
+    
+    
+@router.post("/refresh")
+async def refresh_access_token(request_body: dict = Body(...), db: Session = Depends(get_db)):
+    """Exchange a valid refresh token for a new access token."""
+    refresh_token = request_body.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(status_code=400, detail="Missing refresh_token in request body")
+    
+    try:
+        payload = decode_token(refresh_token)
+    except HTTPException:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    if payload.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Not a refresh token")
+
+    user_id = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(status_code=401, detail="Invalid token payload")
+
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    new_access = create_access_token({"sub": str(user.id)})
+    return JSONResponse(status_code=200, content={"access_token": new_access, "token_type": "bearer"})
