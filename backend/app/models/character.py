@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from ..database import Base
 
 class Character(Base):
+    """Studio Ghibli character metadata from Ghibli API."""
     __tablename__ = "characters"
 
     id = Column(Integer, primary_key=True)

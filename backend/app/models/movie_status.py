@@ -11,6 +11,7 @@ class MovieStatusEnum(PyEnum):
 
 
 class MovieStatus(Base):
+    """Tracks user's watching status for movies (watched/want_to_watch)."""
     __tablename__ = "movie_status"
     __table_args__ = (UniqueConstraint('user_id', 'movie_id', name='uix_user_movie_status'),)
 

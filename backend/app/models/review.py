@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from ..database import Base
 
 class Review(Base):
+    """User-generated movie reviews and ratings (one per user per movie)."""
     __tablename__ = "reviews"
     __table_args__ = (UniqueConstraint('user_id', 'movie_id', name='uix_user_movie_review'),)
 

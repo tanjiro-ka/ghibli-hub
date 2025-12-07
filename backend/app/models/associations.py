@@ -1,6 +1,7 @@
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from ..database import Base
 
+# Many-to-many association table between movies and characters
 movie_character = Table(
     'movie_character',
     Base.metadata,
