@@ -13,12 +13,18 @@ backend/
 │  │  ├─ github.py     # GitHub OAuth routes
 │  │  └─ session.py    # JWT helpers + dependency
 │  ├─ models/
-│  │  └─ user.py       # User SQLAlchemy model
+│  │  ├─ user.py       # User SQLAlchemy model
+│  │  ├─ movie.py      # Movie SQLAlchemy model (from Ghibli API)
+│  │  ├─ character.py  # Character SQLAlchemy model (from Ghibli API)
+│  │  ├─ review.py     # Review SQLAlchemy model (user reviews on movies)
+│  │  └─ associations.py # Association tables (movie_character many-to-many)
 │  ├─ alembic/
+│  │  ├─ env.py        # Alembic environment config
 │  │  └─ versions/     # Alembic migrations
 ├─ Dockerfile          # Dockerfile for FastAPI
 ├─ requirements.txt    # Python dependencies
-docker-compose.yml     # Compose file for backend + PostgreSQL
+├─ README.md           # Backend documentation (this file)
+docker-compose.yml     # Compose file for backend + PostgreSQL (in root project)
 ```
 
 ### 🛠️ Requirements
@@ -32,8 +38,8 @@ Python dependencies are listed in `requirements.txt` and are installed inside th
 ### 🔐 Environment variables (.env)
 Create a `.env` file in the project root (do NOT commit it). Example values are already in your local `.env` during development.
 
-> [!IMPORTANT]
-> Do NOT commit `.env` or any secret values (for example `GITHUB_CLIENT_SECRET` or `SECRET_KEY`) to version control.
+> [!WARNING]
+> Do NOT commit `.env` or any secret values (for example `GITHUB_CLIENT_SECRET` or `SECRET_KEY`) to version control. Use `.env.example` as a template.
 
 Required variables (development):
 ```
@@ -58,19 +64,88 @@ docker-compose up --build -d
 docker-compose logs api --tail 200
 ```
 
+> [!TIP]
+> If the container crashes, check logs with `docker-compose logs api` to see error messages.
+
 Open the API docs to inspect endpoints and payloads:
 
 - Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
 - OpenAPI JSON: `http://localhost:8000/openapi.json`
 
-### 🗄️ Database migrations (Alembic)
-After the first build (or when you change models), run migrations:
+### 🚀 Run the backend locally (without Docker, optional)
 
+If you prefer to develop locally without Docker:
+
+1. Create a virtual environment and activate it:
+   ```powershell
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
+   ```
+
+2. Install dependencies:
+   ```powershell
+   pip install -r requirements.txt
+   ```
+
+3. Ensure PostgreSQL is running locally (or update `DATABASE_URL` in `.env` to point to a remote DB).
+
+4. Run migrations:
+   ```powershell
+   cd app
+   alembic upgrade head
+   ```
+
+5. Start the server:
+   ```powershell
+   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+
+API will be available at `http://localhost:8000`.
+
+### 🗄️ Database models
+
+The backend currently implements the following SQLAlchemy models:
+
+- **User** — Authentication via GitHub OAuth. Stores user profile (email, display name, avatar).
+- **Movie** — Studio Ghibli film data (title, description, director, producer, year, rating, images). Synced from the [Ghibli API](https://ghibliapi.vercel.app/).
+- **Character** — Studio Ghibli characters (name, gender, age, eye color, hair color). Synced from the Ghibli API.
+- **Review** — User reviews on movies (rating 1-5, optional text). One review per user per movie.
+- **movie_character** — Association table linking Movies ↔ Characters (many-to-many).
+- **MovieStatus** — User status tracking (watched, want to watch) for each movie.
+- **UserFavoriteMovie** — User favorite movies (planned).
+- **UserFavoriteCharacter** — User favorite characters (planned).
+
+### 🗄️ Database migrations (Alembic)
+
+> [!IMPORTANT]
+> When running Alembic commands inside the Docker container, **always navigate to `/app/`** where `alembic.ini` is located. This is due to the Docker volume mount configuration.
+
+**Initial migration** (when DB is created):
 ```powershell
-docker-compose exec api alembic upgrade head
+docker-compose exec api bash
+cd /app
+alembic upgrade head
+exit
 ```
 
-This will create/update tables based on `alembic/versions`.
+**After modifying models**, generate and apply new migrations:
+```powershell
+docker-compose exec api bash
+cd /app
+alembic revision --autogenerate -m "describe your changes"
+# Review the migration file in alembic/versions/
+alembic upgrade head
+exit
+```
+
+Example:
+```powershell
+docker-compose exec api bash
+cd /app
+alembic revision --autogenerate -m "add movie status tracking"
+alembic upgrade head
+```
 
 ### 🔁 OAuth (GitHub) and session flow — what we implemented
 
