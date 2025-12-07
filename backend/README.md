@@ -147,7 +147,7 @@ alembic revision --autogenerate -m "add movie status tracking"
 alembic upgrade head
 ```
 
-### 🔁 OAuth (GitHub) and session flow — what we implemented
+### 🔁 OAuth (GitHub) and session flow
 
 This backend supports logging in with GitHub and returns JWTs to the frontend.
 
@@ -161,7 +161,10 @@ This backend supports logging in with GitHub and returns JWTs to the frontend.
 
 Implementation notes:
 - The `state` parameter is generated on login for CSRF protection — in production you must persist & validate it (session or cache like Redis). Current implementation generates a random state but does not validate against server-side storage (acceptable for local dev only).
-- Token lifetimes: access tokens are configured to expire in 7 days and refresh tokens in 30 days (see `app/auth/session.py`). **For production consider much shorter access token lifetimes (minutes to hours) and implement refresh-token rotation and revocation.**
+- Token lifetimes: access tokens are configured to expire in 7 days and refresh tokens in 30 days (see `app/auth/session.py`).
+
+> [!WARNING]
+> For production, use much shorter access token lifetimes (minutes to hours) and implement refresh-token rotation and revocation.
 
 
 ### 🔬 How to test the flow locally

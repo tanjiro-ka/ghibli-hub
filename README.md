@@ -86,16 +86,16 @@ See [backend/README.md](./backend/README.md) for detailed backend documentation.
    ```
    Edit `.env` and add your GitHub OAuth credentials (see [.env.example](./.env.example) for details).
 
-   > [!IMPORTANT]
-   > Never commit `.env` to version control. It contains sensitive secrets (OAuth tokens, database passwords, etc.).
+> [!IMPORTANT]
+> Never commit `.env` to version control. It contains sensitive secrets (OAuth tokens, database passwords, etc.).
 
 3. **Start the application with Docker:**
    ```powershell
    docker-compose up --build -d
    ```
 
-   > [!TIP]
-   > First build may take a few minutes. Check logs with `docker-compose logs api --tail 50`
+> [!TIP]
+> First build may take a few minutes. Check logs with `docker-compose logs api --tail 50`
 
 4. **Run database migrations:**
    ```powershell
