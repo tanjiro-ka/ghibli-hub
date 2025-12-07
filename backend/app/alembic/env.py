@@ -27,6 +27,7 @@ import app.database
 import app.models.user
 import app.models.movie
 import app.models.character
+import app.models.associations
 
 target_metadata = app.database.Base.metadata
 
