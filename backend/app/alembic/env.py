@@ -26,6 +26,7 @@ if config.config_file_name is not None:
 import app.database
 import app.models.user
 import app.models.movie
+import app.models.character
 
 target_metadata = app.database.Base.metadata
 
