@@ -30,6 +30,7 @@ import app.models.character
 import app.models.review
 import app.models.movie_status
 import app.models.favorite_movie
+import app.models.favorite_character
 import app.models.associations
 
 target_metadata = app.database.Base.metadata
