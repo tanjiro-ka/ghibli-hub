@@ -3,7 +3,7 @@ import secrets
 from fastapi import APIRouter, Depends, HTTPException, Body
 from fastapi.responses import RedirectResponse, JSONResponse
 
-from ..config import GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_OAUTH_REDIRECT
+from ..config import settings
 from ..database import get_db
 from ..models.user import User
 from sqlalchemy.orm import Session
@@ -24,8 +24,8 @@ async def github_login():
     state = secrets.token_urlsafe(32)
     
     github_auth_params = {
-        "client_id": GITHUB_CLIENT_ID,
-        "redirect_uri": GITHUB_OAUTH_REDIRECT,
+        "client_id": settings.GITHUB_CLIENT_ID,
+        "redirect_uri": settings.GITHUB_OAUTH_REDIRECT,
         "scope": "user:email",
         "state": state
     }
@@ -56,10 +56,10 @@ async def github_callback(code: str, state: str, db: Session = Depends(get_db)):
         token_response = await client.post(
             GITHUB_TOKEN_URL,
             json={
-                "client_id": GITHUB_CLIENT_ID,
-                "client_secret": GITHUB_CLIENT_SECRET,
+                "client_id": settings.GITHUB_CLIENT_ID,
+                "client_secret": settings.GITHUB_CLIENT_SECRET,
                 "code": code, # GitHub ticket
-                "redirect_uri": GITHUB_OAUTH_REDIRECT
+                "redirect_uri": settings.GITHUB_OAUTH_REDIRECT
             },
             headers={"Accept": "application/json"}
         )

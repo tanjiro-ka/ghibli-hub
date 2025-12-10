@@ -15,9 +15,9 @@ services:
     image: postgres:15
     container_name: ghibli_db
     environment:
-      POSTGRES_USER: ghibli_user
-      POSTGRES_PASSWORD: ghibli_password
-      POSTGRES_DB: ghibli_db
+      POSTGRES_USER: ${POSTGRES_USER:-ghibli_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ghibli_password}
+      POSTGRES_DB: ${POSTGRES_DB:-ghibli_db}
     ports:
       - "5432:5432"
     volumes:

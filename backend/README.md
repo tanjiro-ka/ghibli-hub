@@ -45,12 +45,33 @@ Required variables (development):
 ```
 GITHUB_CLIENT_ID=your_github_client_id
 GITHUB_CLIENT_SECRET=your_github_client_secret
+POSTGRES_USER=ghibli_user
+POSTGRES_PASSWORD=ghibli_password
+POSTGRES_DB=ghibli_db
+DATABASE_URL=postgresql://ghibli_user:ghibli_password@db:5432/ghibli_db
 ```
+
+**Generating a secure `SECRET_KEY`:**
+
+The `SECRET_KEY` is used to sign JWT tokens and must be a secure random string. Generate one using Python (recommended):
+
+```powershell
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+Copy the output and add it to your `.env`:
+```
+SECRET_KEY=xK8vZ2jN9mP4qR5sT6uV7wX8yA9bC0dE1fG2hH3iI4jJ5
+```
+
+> [!TIP]
+> Alternative methods: `openssl rand -hex 32` or use https://randomkeygen.com/ (select "256-bit WPA Key"). For production, always use a unique, randomly generated key per environment.
 
 Optional (defaults provided in `app/config.py`):
 ```
 GITHUB_OAUTH_REDIRECT=http://localhost:8000/auth/github/callback
-SECRET_KEY=dev-secret-key-change-in-production
+ACCESS_TOKEN_EXPIRE_DAYS=7
+REFRESH_TOKEN_EXPIRE_DAYS=30
 ```
 
 ### 🚀 Run the backend (Docker)

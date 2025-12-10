@@ -6,3 +6,5 @@ alembic
 httpx
 python-dotenv
 python-jose[cryptography]
+pydantic-settings
+email-validator
