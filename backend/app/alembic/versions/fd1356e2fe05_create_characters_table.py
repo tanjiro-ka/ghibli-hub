@@ -26,13 +26,14 @@ def upgrade() -> None:
     sa.Column('ghibli_api_id', sa.String(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('gender', sa.String(), nullable=True),
-    sa.Column('age', sa.String(), nullable=True),
+    sa.Column('age', sa.Integer(), nullable=True),
     sa.Column('eye_color', sa.String(), nullable=True),
     sa.Column('hair_color', sa.String(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_characters_age'), 'characters', ['age'], unique=False)
     op.create_index(op.f('ix_characters_gender'), 'characters', ['gender'], unique=False)
     op.create_index(op.f('ix_characters_ghibli_api_id'), 'characters', ['ghibli_api_id'], unique=True)
     op.create_index(op.f('ix_characters_name'), 'characters', ['name'], unique=False)
@@ -45,5 +46,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_characters_name'), table_name='characters')
     op.drop_index(op.f('ix_characters_ghibli_api_id'), table_name='characters')
     op.drop_index(op.f('ix_characters_gender'), table_name='characters')
+    op.drop_index(op.f('ix_characters_age'), table_name='characters')
     op.drop_table('characters')
     # ### end Alembic commands ###

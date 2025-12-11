@@ -11,7 +11,7 @@ class Character(Base):
     ghibli_api_id = Column(String, unique=True, nullable=False, index=True)
     name = Column(String, nullable=False, index=True)
     gender = Column(String, nullable=True, index=True)
-    age = Column(String, nullable=True)
+    age = Column(Integer, nullable=True, index=True)
     eye_color = Column(String, nullable=True)
     hair_color = Column(String, nullable=True)
 

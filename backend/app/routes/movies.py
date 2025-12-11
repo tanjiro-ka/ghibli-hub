@@ -68,18 +68,11 @@ async def get_movies(
     total = query.count()
     
     # Apply sorting
-    sort_field = Movie.title  # default
-    if sort == "release_date":
-        sort_field = Movie.release_date
-    elif sort == "rt_score":
-        sort_field = Movie.rt_score
-    elif sort == "title":
-        sort_field = Movie.title
+    sort_mapping = {"title": Movie.title, "release_date": Movie.release_date, "rt_score": Movie.rt_score}
+    sort_field = sort_mapping.get(sort, Movie.title) # Movie.title default
     
-    if order == "desc":
-        query = query.order_by(desc(sort_field))
-    else:
-        query = query.order_by(asc(sort_field))
+    order_by = desc if order == "desc" else asc
+    query = query.order_by(order_by(sort_field))
     
     # Apply pagination
     movies = query.offset(offset).limit(limit).all()
