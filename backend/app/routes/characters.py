@@ -5,6 +5,8 @@ from typing import Optional
 
 from ..dependencies import get_db
 from ..models.character import Character
+from ..models.movie import Movie
+from ..models.associations import movie_character
 from ..schemas.character import CharacterResponse, CharacterListResponse, MovieInCharacter
 
 
@@ -18,7 +20,7 @@ router = APIRouter(
 async def get_characters(
     limit: int = Query(default=10, ge=1, le=100, description="Number of characters to return"),
     offset: int = Query(default=0, ge=0, description="Number of characters to skip"),
-    name: str = Query(default=None, description="Filter by name (partial match)"),
+    name: Optional[str] = Query(default=None, description="Filter by name (partial match)"),
     gender: Optional[str] = Query(default=None, description="Filter by gender (partial match)"),
     age: Optional[int] = Query(default=None, description="Filter by minimun age"),
     sort: Optional[str] = Query(default="name", description="Field to sort by (name, gender, age)"),
@@ -33,7 +35,7 @@ async def get_characters(
     - **name**: Filter by name (case-insensitive partial match)
     - **gender**: Filter by gender (case-insensitive partial match)
     - **age**: Filter by minimum age
-    - **sort**: Field to sort by (title, release_date, rt_score)
+    - **sort**: Field to sort by (name, gender, age)
     - **order**: Sort order (asc or desc)
     """
     # Build base query
